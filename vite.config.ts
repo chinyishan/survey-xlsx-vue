@@ -4,11 +4,13 @@ import { resolve } from 'path';
 import AutoImport from 'unplugin-auto-import/vite'; //自動導入
 import Components from 'unplugin-vue-components/vite'; //自動導入
 import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'; //自動導入
+import UnoCSS from 'unocss/vite';
 
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
     vue(),
+    UnoCSS(),
     AutoImport({
       resolvers: [ElementPlusResolver()],
     }),

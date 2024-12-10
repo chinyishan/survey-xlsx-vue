@@ -5,6 +5,7 @@ import ElementPlus from 'element-plus';
 import 'element-plus/dist/index.css';
 import * as ElementPlusIconsVue from '@element-plus/icons-vue';
 import './styles/index.css';
+import 'virtual:uno.css';
 
 const app = createApp(App);
 

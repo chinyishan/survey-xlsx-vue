@@ -13,11 +13,21 @@ const navData = router.options.routes;
     <li>
       <router-link to="/ag-grid">ag-grid</router-link>
     </li>
+    <li>
+      <router-link to="/spark-md5">spark-md5</router-link>
+    </li>
   </ul>
 </template>
 
 <style scoped>
 .read-the-docs {
   color: #888;
+}
+ul {
+  display: flex;
+}
+li {
+  padding: 10px;
+  list-style: none;
 }
 </style>

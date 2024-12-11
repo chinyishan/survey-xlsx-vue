@@ -15,6 +15,12 @@ export const constantRoutes: RouteRecordRaw[] = [
     component: () => import('@/views/ag-grid/index.vue'),
     meta: { title: 'Ag-Grid列表編輯' },
   },
+  {
+    path: '/spark-md5',
+    name: 'spark-md5',
+    component: () => import('@/views/spark-md5/index.vue'),
+    meta: { title: 'spark-md5大文件上傳' },
+  },
 ];
 
 /**

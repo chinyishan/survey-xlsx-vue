@@ -33,26 +33,39 @@ import { ElMessage, ElLoading, ElMessageBox } from 'element-plus';
 import type { UploadRawFile, UploadFile } from 'element-plus';
 
 import {
-  sliceFn,
   checkFileFn,
   sliceFileUploadFn,
   tellBackendMergeFn,
 } from '@/utils/request';
 
 const fileStatus: Record<string, any> = {
-  0: '文件不存在（没有上传过）',
-  1: '文件已存在（曾经上传过）',
-  2: '文件不完整（曾经上传中断过，可继续上传）',
+  0: '文件不存在（沒有上傳過）',
+  1: '文件已存在（曾經上傳過）',
+  2: '文件不完整（曾經上傳中斷過，可繼續上傳）',
 };
 
-let doneFileList: any[] = []; // 曾经上传过得文件
-let formDataList = []; // 准备参数数组
+let doneFileList: any[] = []; // 曾經上傳過得文件
+let formDataList = []; // 準備参數數組
 
 const CHUNK_SIZE: number = 5 * 1024 * 1024;
 const progress = ref<number>(0);
 const chunksCount = ref<number>(0);
 const fileHash = ref<string>('');
 const fileProgress = ref<number>(0);
+
+/**
+ * 文件分片函数
+ * @param file 上傳的檔案
+ * @param chunkSize 切割大小
+ */
+const sliceFn = (file: File, chunkSize: number): Blob[] => {
+  const result: Blob[] = [];
+  // 從第0字結开始切割，一次切割1 * 1024 * 1024字节
+  for (let i = 0; i < file.size; i = i + chunkSize) {
+    result.push(file.slice(i, i + chunkSize));
+  }
+  return result;
+};
 
 /**
  * 輔助線程計算大文件hash值
@@ -75,6 +88,7 @@ const calFileMd5ByThreadFn = (chunks: Blob[]): Promise<string> => {
     // 處理 Worker 返回的消息
     worker.onmessage = (e: MessageEvent) => {
       const { hash, hashProgress, error } = e.data;
+      console.log('收到 Worker 訊息:', e.data);
 
       // 錯誤
       if (error) {

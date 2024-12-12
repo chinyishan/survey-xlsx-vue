@@ -39,9 +39,14 @@
         style="height: 600px"
         :columnDefs="columnDefs"
         :rowData="rowData"
-        :enableColResize="true"
+        :pagination="true"
+        :paginationPageSize="20"
         :stopEditingWhenCellsLoseFocus="true"
       ></ag-grid-vue>
+      <!--  
+        :rowSelection="rowOptions.rowSelection" 
+        :rowDragManaged="true"
+      -->
     </div>
     <template #footer>
       <div class="dialog-footer">
@@ -112,6 +117,8 @@ const keyProps = computed(() => {
  */
 const colOptions = ref<IObject>({
   editable: true,
+  rowDrag: true,
+  colId: '',
 });
 
 /**

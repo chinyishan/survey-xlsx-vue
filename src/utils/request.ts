@@ -1,20 +1,6 @@
 import axios from 'axios';
 
 /**
- * 文件分片函数
- * @param file 上傳的檔案
- * @param chunkSize 切割大小
- */
-export function sliceFn(file: File, chunkSize: number): Blob[] {
-  const result: Blob[] = [];
-  // 從第0字結开始切割，一次切割1 * 1024 * 1024字节
-  for (let i = 0; i < file.size; i = i + chunkSize) {
-    result.push(file.slice(i, i + chunkSize));
-  }
-  return result;
-}
-
-/**
  * 校驗文件是否上傳過，分三種情况：見：fileStatus
  * @param fileMd5 Md5 計算的 hash 值
  */

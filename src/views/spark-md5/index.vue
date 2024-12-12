@@ -45,8 +45,6 @@ const fileStatus: Record<string, any> = {
   2: '文件不完整（曾经上传中断过，可继续上传）',
 };
 
-const inputRef = ref(); // 输入框dom
-
 let doneFileList: any[] = []; // 曾经上传过得文件
 let formDataList = []; // 准备参数数组
 
@@ -115,7 +113,6 @@ const calFileMd5ByThreadFn = (chunks: Blob[]): Promise<string> => {
 const changeFile = async (rawFile: UploadRawFile) => {
   const file = rawFile; // 获取文件
   const chunks = sliceFn(file, CHUNK_SIZE); // 文件分块
-  console.log(file, 'file');
   console.log('文件分片成數組', chunks);
 
   chunksCount.value = chunks.length; // 更新分片计数
@@ -139,6 +136,19 @@ const uploadFileCheck = async (
   chunks: Blob[],
   fileName: string
 ) => {
+  formDataList = chunks.map((item: any, index: any) => {
+    // 后端接参大致有：文件片、文件分的片数、每次上传是第几片(索引)、文件名、此完整大文件hash值
+    // 具体后端定义的参数prop属性名，看他们如何定义的，这个无妨...
+    let formData = new FormData();
+    formData.append('file', item); // 使用FormData可以将blob文件转成二进制binary
+    formData.append('chunks', chunks.length.toString());
+    formData.append('chunk', index.toString());
+    formData.append('name', fileName);
+    formData.append('md5', fileMd5);
+    console.log(formData.get('file'), fileName);
+    return { formData };
+  });
+
   // 根據文件的hash值進行上傳之前的校驗，校驗结果如下三種情况
   const res: any = await checkFileFn(fileMd5);
 
@@ -153,8 +163,8 @@ const uploadFileCheck = async (
 
   // 2: 曾經上傳過一部分，現在要繼續上傳
   if (res.data.resultCode == 2) {
-    // 若是文件曾上传过一部分，后端会返回上传过得部分的文件索引，前端通过索引可以知道哪些
-    // 上传过，做一个过滤，已上传的文件就不用继续上传了，上传未上传过的文件片
+    // 若文件曾上傳過一部分，後端會返回上傳過的部分的文件索引，前端通過索引可以知道哪些上傳過，
+    // 需做一個過濾，已上傳的文件就不用繼續上傳了，僅上傳未上傳過的文件片
     doneFileList = res.data.resultData.map((item: any) => {
       return item * 1; // 后端给到的是字符串索引，这里转成数字索引
     });
@@ -166,11 +176,10 @@ const uploadFileCheck = async (
     console.log(fileStatus[res.data.resultCode]);
   }
 
-  // 说明没有上传过，组装一下，直接使用
+  // 没有上傳過，組装一下，直接使用
   if (doneFileList.length == 0) {
     formDataList = chunks.map((item: any, index: any) => {
-      // 后端接参大致有：文件片、文件分的片数、每次上传是第几片(索引)、文件名、此完整大文件hash值
-      // 具体后端定义的参数prop属性名，看他们如何定义的，这个无妨...
+      // 後端接参數大致有：文件片、文件分的片數、每次上傳是第幾片(索引)、文件名、此完整大文件hash值
       let formData = new FormData();
       formData.append('file', item); // 使用FormData可以将blob文件转成二进制binary
       formData.append('chunks', chunks.length.toString());
@@ -180,7 +189,7 @@ const uploadFileCheck = async (
       return { formData };
     });
   } else {
-    // 说明曾经上传过，需要过滤一下，曾经上传过的就不用再上传了
+    // 說明曾經上傳過，需要過濾一下，層經上傳的就不用再上傳了
     formDataList = chunks
       .filter((index: any) => {
         return !doneFileList.includes(index);
@@ -195,7 +204,6 @@ const uploadFileCheck = async (
         return { formData };
       });
   }
-  console.log(formDataList, fileName);
   fileUpload(formDataList, fileName);
 };
 
@@ -208,28 +216,32 @@ const fileUpload = (
 ) => {
   const requestListFn = formDataList.map(async ({ formData }, index) => {
     const res: any = await sliceFileUploadFn(formData);
-    // 每上传完毕一片文件，后端告知已上传了多少片，除以总片数，就是进度
+    // 每上傳完畢一片文件，後端告知已上傳了多少片，除以總片數，就是進度
     fileProgress.value = Math.ceil(
       (res.data.resultData / chunksCount.value) * 100
     );
     return res;
   });
   // 使用allSettled发请求好一些，挂了的就挂了，不影响后续不挂的请求
+
+  console.log('合併哪個文件: ', fileName, fileHash.value);
+
   Promise.allSettled(requestListFn).then(async (many) => {
-    // 都上传完毕了，文件上传进度条就为100%了
+    // 都上傳完畢了，文件上傳進度條就為100%
     fileProgress.value = 100;
-    // 最后再告知后端合并一下已经上传的文件碎片了即可
+
+    // 最後再告知後端合併已經上傳的文件碎片
     const loading = ElLoading.service({
       lock: true,
-      text: '文件合并中，请稍后...',
+      text: '文件合併中，请稍後...',
       background: 'rgba(0, 0, 0, 0.7)',
     });
     const res: any = await tellBackendMergeFn(fileName, fileHash.value);
     if (res.data.resultCode === 0) {
-      console.log('文件并合成功,大文件上传任务完成');
+      console.log('文件合併成功，大文件上傳任務完成');
       loading.close();
     } else {
-      console.log('文件并合失败,大文件上传任务未完成');
+      console.log('文件合併失敗，大文件上傳任務未完成');
       loading.close();
     }
   });

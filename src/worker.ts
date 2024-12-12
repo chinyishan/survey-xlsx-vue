@@ -6,7 +6,6 @@ import SparkMD5 from 'spark-md5';
  * @param chunks 分塊數據
  */
 self.onmessage = (e: MessageEvent) => {
-  console.log(e.data, 'e.data');
   const { chunks } = e.data; // 獲取文件分片數組
   const spark = new SparkMD5.ArrayBuffer(); // 實例化spark對象用於計算文件hash
   const fileReader = new FileReader(); // 實例化文件閱讀器來讀取blob二進制文件

@@ -21,9 +21,16 @@
         <em>點擊上傳</em>
       </div>
     </el-upload>
-    <el-progress :percentage="progress" />
-    <p>文件區塊數 : {{ chunksCount }} 片</p>
-    <p>計算文件的 Hash 值 : {{ fileHash }}</p>
+    <div>
+      <p>文件區塊數 : {{ chunksCount }} 片</p>
+      <p>計算文件的 Hash 值 : {{ fileHash }}</p>
+      <el-progress :percentage="hashProgress" />
+    </div>
+    <div>
+      <p>上傳文件的進度</p>
+      <p v-show="fileProgress == 100">文件上傳完成</p>
+      <el-progress :percentage="fileProgress"></el-progress>
+    </div>
   </div>
 </template>
 
@@ -48,7 +55,7 @@ let doneFileList: any[] = []; // 曾經上傳過得文件
 let formDataList = []; // 準備参數數組
 
 const CHUNK_SIZE: number = 5 * 1024 * 1024;
-const progress = ref<number>(0);
+const hashProgress = ref<number>(0);
 const chunksCount = ref<number>(0);
 const fileHash = ref<string>('');
 const fileProgress = ref<number>(0);
@@ -125,15 +132,15 @@ const calFileMd5ByThreadFn = (chunks: Blob[]): Promise<string> => {
  * 第一步，上傳文件
  * */
 const changeFile = async (rawFile: UploadRawFile) => {
-  const file = rawFile; // 获取文件
-  const chunks = sliceFn(file, CHUNK_SIZE); // 文件分块
+  const file = rawFile; // 獲取文件
+  const chunks = sliceFn(file, CHUNK_SIZE); // 文件分塊
   console.log('文件分片成數組', chunks);
 
-  chunksCount.value = chunks.length; // 更新分片计数
+  chunksCount.value = chunks.length; // 更新分片計數
 
   // 分片數組用於計算 MD5，更新進度條
   const fileMd5 = await calFileMd5ByThreadFn(chunks);
-  fileHash.value = fileMd5; // 保存计算得到的 MD5
+  fileHash.value = fileMd5; // 保存計算得到的 MD5
 
   // 調用上傳檢查邏輯
   await uploadFileCheck(fileMd5, chunks, file.name);
@@ -151,8 +158,7 @@ const uploadFileCheck = async (
   fileName: string
 ) => {
   formDataList = chunks.map((item: any, index: any) => {
-    // 后端接参大致有：文件片、文件分的片数、每次上传是第几片(索引)、文件名、此完整大文件hash值
-    // 具体后端定义的参数prop属性名，看他们如何定义的，这个无妨...
+    // 後端接参：文件片、文件分的片數、每次上傳是第幾片(索引)、文件名、此完整大文件hash值
     let formData = new FormData();
     formData.append('file', item); // 使用FormData可以将blob文件转成二进制binary
     formData.append('chunks', chunks.length.toString());
@@ -163,39 +169,70 @@ const uploadFileCheck = async (
     return { formData };
   });
 
+  // // 根據文件的hash值進行上傳之前的校驗，校驗结果如下三種情况
+  // const res: any = await checkFileFn(fileMd5);
+
+  // // 1: 曾經上傳過，不需要再上傳了
+  // if (res.data.resultCode == 1) {
+  //   ElMessage({
+  //     type: 'warning',
+  //     message: fileStatus[res.data.resultCode],
+  //   });
+  //   return;
+  // }
+
+  // // 2: 曾經上傳過一部分，現在要繼續上傳
+  // if (res.data.resultCode == 2) {
+  //   // 若文件曾上傳過一部分，後端會返回上傳過的部分的文件索引，前端通過索引可以知道哪些上傳過，
+  //   // 需做一個過濾，已上傳的文件就不用繼續上傳了，僅上傳未上傳過的文件片
+  //   doneFileList = res.data.resultData.map((item: any) => {
+  //     return item * 1; // 後端给到的是字符串索引，這裡轉成數字索引
+  //   });
+  //   console.log(fileStatus[res.data.resultCode]);
+  // }
+
+  // // 0: 沒有上傳過，直接上傳
+  // if (res.data.resultCode == 0) {
+  //   console.log(fileStatus[res.data.resultCode]);
+  // }
+
   // 根據文件的hash值進行上傳之前的校驗，校驗结果如下三種情况
-  const res: any = await checkFileFn(fileMd5);
+  await checkFileFn(fileMd5)
+    .then((res) => {
+      // 1: 曾經上傳過，不需要再上傳了
+      if (res.data.resultCode == 1) {
+        ElMessage({
+          type: 'warning',
+          message: fileStatus[res.data.resultCode],
+        });
+        return;
+      }
 
-  // 1: 曾經上傳過，不需要再上傳了
-  if (res.data.resultCode == 1) {
-    ElMessage({
-      type: 'warning',
-      message: fileStatus[res.data.resultCode],
+      // 2: 曾經上傳過一部分，現在要繼續上傳
+      if (res.data.resultCode == 2) {
+        // 若文件曾上傳過一部分，後端會返回上傳過的部分的文件索引，前端通過索引可以知道哪些上傳過，
+        // 需做一個過濾，已上傳的文件就不用繼續上傳了，僅上傳未上傳過的文件片
+        doneFileList = res.data.resultData.map((item: any) => {
+          return item * 1; // 后端给到的是字符串索引，这里转成数字索引
+        });
+        console.log(fileStatus[res.data.resultCode]);
+      }
+
+      // 0: 沒有上傳過，直接上傳
+      if (res.data.resultCode == 0) {
+        console.log(fileStatus[res.data.resultCode]);
+      }
+    })
+    .catch((err) => {
+      ElMessage.error('校驗文件失敗:' + err);
     });
-    return;
-  }
-
-  // 2: 曾經上傳過一部分，現在要繼續上傳
-  if (res.data.resultCode == 2) {
-    // 若文件曾上傳過一部分，後端會返回上傳過的部分的文件索引，前端通過索引可以知道哪些上傳過，
-    // 需做一個過濾，已上傳的文件就不用繼續上傳了，僅上傳未上傳過的文件片
-    doneFileList = res.data.resultData.map((item: any) => {
-      return item * 1; // 后端给到的是字符串索引，这里转成数字索引
-    });
-    console.log(fileStatus[res.data.resultCode]);
-  }
-
-  // 0: 沒有上傳過，直接上傳
-  if (res.data.resultCode == 0) {
-    console.log(fileStatus[res.data.resultCode]);
-  }
 
   // 没有上傳過，組装一下，直接使用
   if (doneFileList.length == 0) {
     formDataList = chunks.map((item: any, index: any) => {
       // 後端接参數大致有：文件片、文件分的片數、每次上傳是第幾片(索引)、文件名、此完整大文件hash值
       let formData = new FormData();
-      formData.append('file', item); // 使用FormData可以将blob文件转成二进制binary
+      formData.append('file', item); // 使用FormData可以將blob文件转成二進制binary
       formData.append('chunks', chunks.length.toString());
       formData.append('chunk', index.toString());
       formData.append('name', fileName);
@@ -210,7 +247,7 @@ const uploadFileCheck = async (
       })
       .map((item: any, index: any) => {
         let formData = new FormData();
-        formData.append('file', item); // 使用FormData可以将blob文件转成二进制binary
+        formData.append('file', item); // 使用FormData可以將blob文件转成二進制binary
         formData.append('chunks', chunks.length.toString());
         formData.append('chunk', index.toString());
         formData.append('name', fileName);
@@ -236,7 +273,7 @@ const fileUpload = (
     );
     return res;
   });
-  // 使用allSettled发请求好一些，挂了的就挂了，不影响后续不挂的请求
+  // 使用 allSettled 發請求好一些，掛了的就掛了，不影想後續不掛的請求
 
   console.log('合併哪個文件: ', fileName, fileHash.value);
 
@@ -288,7 +325,7 @@ const handleUploadError = (error: Error) => {
  * @param val 進度數
  */
 const progressFn = (val: number) => {
-  progress.value = val;
+  hashProgress.value = val;
 };
 </script>
 <style></style>

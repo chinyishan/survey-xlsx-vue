@@ -5,11 +5,11 @@ import axios from 'axios';
  * @param fileMd5 Md5 計算的 hash 值
  */
 export function checkFileFn(fileMd5: any) {
-  return new Promise((resolve, reject) => {
-    resolve(
-      axios.post(`http://127.0.0.1:8686/bigfile/check?fileMd5=${fileMd5}`)
-    );
-  });
+  return axios.post(`http://127.0.0.1:8686/bigfile/check?fileMd5=${fileMd5}`);
+  // return new Promise((resolve, reject) => {
+  //   resolve(
+  //   );
+  // });
 }
 
 /**

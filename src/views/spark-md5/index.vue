@@ -85,7 +85,7 @@ const sliceFn = (file: File, chunkSize: number): Blob[] => {
 const calFileMd5ByThreadFn = (chunks: Blob[]): Promise<string> => {
   return new Promise((resolve, reject) => {
     // 創建 Web Worker
-    const worker = new Worker(new URL('@/worker.ts', import.meta.url), {
+    const worker = new Worker(new URL('@/plugins/worker.ts', import.meta.url), {
       type: 'module',
     });
 
@@ -282,19 +282,19 @@ const fileUpload = (
     fileProgress.value = 100;
 
     // 最後再告知後端合併已經上傳的文件碎片
-    const loading = ElLoading.service({
-      lock: true,
-      text: '文件合併中，请稍後...',
-      background: 'rgba(0, 0, 0, 0.7)',
-    });
-    const res: any = await tellBackendMergeFn(fileName, fileHash.value);
-    if (res.data.resultCode === 0) {
-      console.log('文件合併成功，大文件上傳任務完成');
-      loading.close();
-    } else {
-      console.log('文件合併失敗，大文件上傳任務未完成');
-      loading.close();
-    }
+    // const loading = ElLoading.service({
+    //   lock: true,
+    //   text: '文件合併中，请稍後...',
+    //   background: 'rgba(0, 0, 0, 0.7)',
+    // });
+    // const res: any = await tellBackendMergeFn(fileName, fileHash.value);
+    // if (res.data.resultCode === 0) {
+    //   console.log('文件合併成功，大文件上傳任務完成');
+    //   loading.close();
+    // } else {
+    //   console.log('文件合併失敗，大文件上傳任務未完成');
+    //   loading.close();
+    // }
   });
 };
 

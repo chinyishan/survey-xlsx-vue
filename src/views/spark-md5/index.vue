@@ -277,7 +277,7 @@ const fileUpload = (
 
   console.log('合併哪個文件: ', fileName, fileHash.value);
 
-  Promise.allSettled(requestListFn).then(async (many) => {
+  Promise.allSettled(requestListFn).then(async (res) => {
     // 都上傳完畢了，文件上傳進度條就為100%
     fileProgress.value = 100;
 
@@ -295,7 +295,9 @@ const fileUpload = (
     //   console.log('文件合併失敗，大文件上傳任務未完成');
     //   loading.close();
     // }
-  });
+  }).catch((err) =>{
+    
+  })
 };
 
 /**

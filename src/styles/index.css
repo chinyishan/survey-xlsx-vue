@@ -8,29 +8,17 @@ a:hover {
 }
 
 h1 {
-  font-size: 2em;
-  line-height: 1.1;
+  font-size: 28px;
+  line-height: 32px;
+  margin: 10px 0px;
+  color: #474747;
 }
 
-/* button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 5px 10px;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  border-color: #646cff;
-  background-color: #646cff;
-  color: white;
-  cursor: pointer;
-  transition: border-color 0.25s;
-  margin: 10px;
+* {
+  margin: 0;
+  padding: 0;
 }
-button:hover {
-  border-color: #646cff;
-} */
-
-#app {
-  max-width: 1280px;
+.app-container {
+  max-width: 1200px;
   margin: 0 auto;
 }

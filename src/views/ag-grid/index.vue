@@ -1,6 +1,6 @@
 <template>
-  <div>
-    <h3>Ag-Grid</h3>
+  <div class="app-container">
+    <h1>Ag-Grid列表編輯</h1>
     <XlsxUpload
       v-model:uploadData="tableList"
       v-model:uploadHeader="tableHeader"

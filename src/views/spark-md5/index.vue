@@ -1,6 +1,6 @@
 <template>
-  <div>
-    <h3>Spark-Md5</h3>
+  <div class="app-container">
+    <h1>spark-md5大文件上傳</h1>
     <el-upload
       class="upload-demo"
       drag
@@ -277,27 +277,27 @@ const fileUpload = (
 
   console.log('合併哪個文件: ', fileName, fileHash.value);
 
-  Promise.allSettled(requestListFn).then(async (res) => {
-    // 都上傳完畢了，文件上傳進度條就為100%
-    fileProgress.value = 100;
+  Promise.allSettled(requestListFn)
+    .then(async (res) => {
+      // 都上傳完畢了，文件上傳進度條就為100%
+      fileProgress.value = 100;
 
-    // 最後再告知後端合併已經上傳的文件碎片
-    // const loading = ElLoading.service({
-    //   lock: true,
-    //   text: '文件合併中，请稍後...',
-    //   background: 'rgba(0, 0, 0, 0.7)',
-    // });
-    // const res: any = await tellBackendMergeFn(fileName, fileHash.value);
-    // if (res.data.resultCode === 0) {
-    //   console.log('文件合併成功，大文件上傳任務完成');
-    //   loading.close();
-    // } else {
-    //   console.log('文件合併失敗，大文件上傳任務未完成');
-    //   loading.close();
-    // }
-  }).catch((err) =>{
-    
-  })
+      // 最後再告知後端合併已經上傳的文件碎片
+      // const loading = ElLoading.service({
+      //   lock: true,
+      //   text: '文件合併中，请稍後...',
+      //   background: 'rgba(0, 0, 0, 0.7)',
+      // });
+      // const res: any = await tellBackendMergeFn(fileName, fileHash.value);
+      // if (res.data.resultCode === 0) {
+      //   console.log('文件合併成功，大文件上傳任務完成');
+      //   loading.close();
+      // } else {
+      //   console.log('文件合併失敗，大文件上傳任務未完成');
+      //   loading.close();
+      // }
+    })
+    .catch((err) => {});
 };
 
 /**

@@ -18,7 +18,9 @@
       "@/*": [
         "./src/*"
       ]
-    }
+    },
+    //  vite build 的時候(elment-plus)沒有通過TypeScript的類型檢查
+    "skipLibCheck": true
   },
   "include": [
     "src/**/*.ts",

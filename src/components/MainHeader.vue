@@ -17,7 +17,7 @@ const route = useRoute();
 const router = useRouter();
 const navData = router.options.routes;
 
-const activeIndex = ref('1');
+const activeIndex = ref('0');
 // const handleSelect = (key: string, keyPath: string[]) => {
 //   console.log(key, keyPath);
 // };

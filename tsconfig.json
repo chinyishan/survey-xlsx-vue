@@ -19,8 +19,10 @@
         "./src/*"
       ]
     },
-    //  vite build 的時候(elment-plus)沒有通過TypeScript的類型檢查
-    "skipLibCheck": true
+    "skipLibCheck": true, // elment-plus沒有通過TypeScript的類型檢查
+    "emitDeclarationOnly": true, // 只输出声明文件(ts 产物)
+    "declaration": true, // 自动生成声明文件
+    "declarationDir": "dist", // 声明文件生成的目录
   },
   "include": [
     "src/**/*.ts",
@@ -30,5 +32,10 @@
     "vite.config.ts",
     "components.d.ts",
     "auto-imports.d.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "**/*.js"
   ]
 }

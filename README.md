@@ -8,19 +8,18 @@
 - **Ag-Grid 表格編輯**：提供高效的表格數據處理和編輯功能。
 - **大文件上傳**：通過 `spark-md5` 和 Web Worker 實現大文件的分片上傳與 MD5 驗證。
 
-## 技術棧
+## 使用技術
 
-- **開發工具**：
+### 開發工具
+- [Vite](https://vitejs.dev/)：快速、現代化的前端構建工具。
+- [TypeScript](https://www.typescriptlang.org/)：靜態類型檢查，增強代碼可維護性。
+- [Vue 3](https://vuejs.org/)：構建用戶界面的漸進式框架。
 
-  - [Vite](https://vitejs.dev/)：快速、現代化的前端構建工具。
-  - [TypeScript](https://www.typescriptlang.org/)：靜態類型檢查，增強代碼可維護性。
-  - [Vue 3](https://vuejs.org/)：構建用戶界面的漸進式框架。
-
-- **主要依賴**：
-  - [xlsx](https://github.com/SheetJS/sheetjs)：處理 Excel 文件的讀取和導出。
-  - [ag-Grid](https://www.ag-grid.com/)：功能強大的數據表格。
-  - [spark-md5](https://github.com/satazor/js-spark-md5)：高效的 MD5 算法庫。
-  - **Web Worker**：實現多線程處理，提升大文件上傳性能。
+### 主要依賴
+- [xlsx](https://github.com/SheetJS/sheetjs)：處理 Excel 文件的讀取和導出。
+- [ag-Grid](https://www.ag-grid.com/)：功能強大的數據表格。
+- [spark-md5](https://github.com/satazor/js-spark-md5)：高效的 MD5 算法庫。
+- **Web Worker**：實現多線程處理，提升大文件上傳性能。
 
 ## 功能特性
 
